@@ -4,6 +4,17 @@ var submitButton = document.getElementById("submit")
 
 
 
+
+var accessToken = sessionStorage.getItem('accessToken')
+var refreshToken = sessionStorage.getItem('refreshToken')
+
+if (accessToken){
+    window.location.href = "../markup/dashboard.html"
+}
+
+
+
+
 signUpForm.addEventListener("submit", function(e){
     e.preventDefault()
     

@@ -32,6 +32,18 @@ body {
     justify-content: space-between;
 }
 
+.buttons {
+    flex: 20% 0 0;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+}
+
+.button {
+    padding: 5px 10px;
+
+}
+
 .user-profile {
     width: 95%;
     margin-left: 2.5%;

@@ -10,13 +10,19 @@
     <div class="wrap">
         <section class="head">
             <div class="org">iMessenger</div>
+            <div class="buttons">
+                <a href="./landing.html"><button class="button">Home</button></a>
+                <a id="logout"><button class="button">Log Out</button></a>
+            </div>
         </section>
+
+        <span id="logout-error" class="logout-error"></span>
 
         <section class="user-profile">
             <div class="user-img-wrap">
                 <img class="user-img" src="../assets/images/test.jpg" alt="">
             </div>
-            <span class="user-name">Barnabas Babatunde</span>
+            <span class="user-name" id="user-name">Barnabas Babatunde</span>
         </section>
 
 
@@ -264,6 +270,7 @@
             </div>
         </section>
     </div>
+    <script src="../logic/utils/jwt-decode.js"></script>
     <script src="../logic/dashboard.js"></script>
 </body>
 </html>

@@ -2,6 +2,21 @@ var loginForm = document.getElementById("loginForm")
 var serverResponseContainer = document.getElementById("serverResponse")
 var submitButton = document.getElementById("submit")
 
+
+
+
+var accessToken = sessionStorage.getItem('accessToken')
+var refreshToken = sessionStorage.getItem('refreshToken')
+
+if (accessToken){
+    window.location.href = "../markup/dashboard.html"
+}
+
+
+
+
+var serverResponse
+
 loginForm.addEventListener("submit", function(e){
     e.preventDefault()
     
@@ -15,25 +30,36 @@ loginForm.addEventListener("submit", function(e){
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        var status = response.status
+    .then((response) => {
+            serverResponse = response
 
-        if (status === 200){
+            return response.json()
+        })
+        .then(jsonResponse => {
 
-            //redirect to user dashboard page
-            window.location.href = "../markup/dashboard.html"
+            var responseData = jsonResponse
+
+            if (serverResponse.status === 200){
+
+                sessionStorage.setItem('accessToken', responseData.accessToken)
+                sessionStorage.setItem('refreshToken', responseData.refreshToken)
+
+                // redirect to user dashboard page
+                window.location.href = "../markup/dashboard.html"
             
-        } else if (status === 401) {
-            //invalid email or password notification
-            serverResponseContainer.innerHTML = '<span class="notification-failure">Invalid email or password</span>'
+            } else if (serverResponse.status === 401) {
+                //invalid email or password notification
+                serverResponseContainer.innerHTML = '<span class="notification-failure">Invalid email or password</span>'
+                submitButton.disabled = false
 
 
-        } else {
-            //internal server error notification
-            serverResponseContainer.innerHTML = '<span class="notification-internalError">Internal server error. Please try again later</span>'
+            } else {
+                //internal server error notification
+                serverResponseContainer.innerHTML = '<span class="notification-internalError">Internal server error. Please try again later</span>'
+                submitButton.disabled = false
 
-        }
+            }
 
-    })
+        })
 
 })
