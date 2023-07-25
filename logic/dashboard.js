@@ -2,6 +2,7 @@ var communitySection = document.getElementById("community")
 var usernameSection = document.getElementById("user-name")
 var logoutButton = document.getElementById("logout")
 var logoutError = document.getElementById("logout-error")
+var sessionExpired = document.getElementById("session-expired")
 
 
 
@@ -9,45 +10,124 @@ var logoutError = document.getElementById("logout-error")
 var accessToken = sessionStorage.getItem('accessToken')
 var refreshToken = sessionStorage.getItem('refreshToken')
 
-if (!accessToken){
+if (!accessToken){  //no access token
     window.location.href = "../markup/landing.html"
 }
 
 
 
-//login session management
-function sessionManagement(accessToken){
-    var accessToken_decoded = jwt_decode(accessToken)
+//logout a user
+var logoutHeader = new Headers()
+logoutHeader.append('x-refresh-token', refreshToken)
 
-    var loginDuration = accessToken_decoded.exp - accessToken_decoded.iat //in seconds
+function logout(){
+    //invalidate refresh token in api
+    fetch("http://localhost:3000/auth/logout", {
+        method: 'POST',
+        headers: logoutHeader
+    })
+    .then((response) => {
+        if (response.status === 200) {
+            //wipe off tokens on frontend
+            sessionStorage.removeItem('accessToken')
+            sessionStorage.removeItem('refreshToken')
 
-    var elapseTime = Date.now() + loginDuration
 
-    if(!sessionStorage.getItem('expiration')){
-        sessionStorage.setItem('expiration', elapseTime)
-    }
+            window.location.href = "../markup/landing.html"
 
+        } else {
+            //error - could not logout
+            logoutError.innerHTML = 'there was an error logging out, try again later'
+            logoutError.style.color = 'white'
+            logoutError.style.backgroundColor = 'red'
+            logoutError.style.padding = '7px'
+            logoutError.style.fontSize = '13px'
+            logoutError.style.display = 'inline-block'
+            logoutError.style.marginTop = '30px'
+            logoutError.style.marginLeft = '2.5%'
+        }
+    })
 }
 
-sessionManagement(accessToken)
-
-
-setInterval(function(){
-    if (Date.now() >= sessionStorage.getItem('expiration')){
-        //new access token using the refresh token
-
-                //wipe off 'expiration' in sessionStorage
-
-                //pass it to sessionManagement
+logoutButton.addEventListener("click", logout)
 
 
 
-        //no new access token using the refresh token
 
-                //log user out
+//login session management
+// function sessionManagement(accessToken){
+//     var accessToken_decoded = jwt_decode(accessToken)
 
-    }
-}, 1000)
+//     var loginDuration = accessToken_decoded.exp - accessToken_decoded.iat //in seconds
+//     console.log(loginDuration)
+
+//     var elapseTime = (Date.now() * 1000) + loginDuration
+//     console.log(elapseTime)
+
+//     if(!sessionStorage.getItem('expiration')){
+//         sessionStorage.setItem('expiration', elapseTime)
+//     }
+
+// }
+
+// sessionManagement(accessToken)
+
+
+// var accesstokenHeader = new Headers()
+// accesstokenHeader.append('refresh-token', refreshToken)
+
+// var getTokenResponse
+
+// setInterval(function(){
+//     if ((Date.now() * 1000) >= sessionStorage.getItem('expiration')){
+
+//         console.log(Date.now() * 1000)
+//         //get new access token using the refresh token
+//         fetch("http://localhost:3000/auth/accesstoken", {
+//             method: 'GET',
+//             headers: accesstokenHeader
+//         })
+//         .then(response => {
+//             getTokenResponse = response
+
+//             return response.json()
+//         })
+//         .then(jsonResponse => {
+//             if(getTokenResponse.status === 200){   //new access token retrieved
+
+//                 //wipe off 'expiration' in sessionStorage
+//                 sessionStorage.removeItem('expiration')
+
+//                 //replace access token and refresh token in sessionStorage
+//                 sessionStorage.removeItem('accessToken')
+//                 sessionStorage.removeItem('refreshToken')
+//                 sessionStorage.setItem('accessToken', jsonResponse.accessToken)
+//                 sessionStorage.setItem('refreshToken', refreshToken)
+
+
+//                 //refresh page
+//                 window.location.reload()
+
+
+//             } else {    //no new access token retrieved
+                
+//                 //session expired. Log user out
+//                 sessionExpired.innerHTML = 'session expired...logging you out'
+//                 sessionExpired.style.color = 'white'
+//                 sessionExpired.style.backgroundColor = 'yellow'
+//                 sessionExpired.style.padding = '7px'
+//                 sessionExpired.style.fontSize = '13px'
+//                 sessionExpired.style.display = 'inline-block'
+//                 sessionExpired.style.marginTop = '30px'
+//                 sessionExpired.style.marginLeft = '2.5%'
+
+//                 setTimeout(logout, 200000)
+//             }
+
+//         })
+
+//     }
+// }, 100000)
 
 
 
@@ -90,7 +170,7 @@ fetch("http://localhost:3000/userDetails", {
 
 
 
-//fetch all registered users from api
+//fetch all registered users from api   //****only users who are NOT self, friends, sent-friend-requests, or received-friend-requests */
 var userData
 var userDataResponse
 
@@ -118,45 +198,51 @@ fetch("http://localhost:3000/users", {
                             <span class="span">${ profile.name }</span>
                             <span class="span">${ profile.location }</span>
                             <span class="span">${ profile.interests }</span>
+                            <button class="add-friend" id=${ profile._id }>Add friend</button>
                         </div>
                     <\div>`
                 } 
             }
+
+
+            var addFriendButtons = document.querySelectorAll(".add-friend")
+            
+            var addFriendResponse
+            
+            addFriendButtons.forEach((button) => {
+                button.addEventListener("click", () => {
+
+                    var buttonID = button.id    //string
+            
+                    //send id and access token in post request header
+                    var addFriendHeader = new Headers()
+                    addFriendHeader.append('x-access-token', accessToken)
+                    addFriendHeader.append('potential-friend-id', buttonID)
+            
+            
+                    fetch("http://localhost:3000/addFriend", {
+                        method: 'POST',
+                        headers: addFriendHeader
+                    })
+                    .then(response => {
+                        addFriendResponse = response
+            
+                        return response.json()
+                    })
+                    .then(jsonResponse => {
+                        if (addFriendResponse.status === 200){
+                            //show success notification
+                            button.innerHTML = 'Added✔'
+                            button.style.color = 'green'
+                            
+            
+                            //reload page
+                            //window.location.reload()
+                        } else {
+                            //show failure notification
+                            console.log(jsonResponse.message)
+                        }
+                    })
+                })
+            })
         })
-
-
-
-
-var logoutHeader = new Headers()
-logoutHeader.append('x-refresh-token', refreshToken)
-
-logoutButton.addEventListener("click", function(){
-
-    //invalidate refresh token in api
-    fetch("http://localhost:3000/auth/logout", {
-        method: 'POST',
-        headers: logoutHeader
-    })
-    .then((response) => {
-        if (response.status === 200) {
-            //wipe off tokens
-            sessionStorage.removeItem('accessToken')
-            sessionStorage.removeItem('refreshToken')
-
-
-            window.location.href = "../markup/landing.html"
-
-        } else {
-            //error - could not logout
-            logoutError.innerHTML = 'there was an error logging out, try again later'
-            logoutError.style.color = 'white'
-            logoutError.style.backgroundColor = 'red'
-            logoutError.style.padding = '7px'
-            logoutError.style.fontSize = '13px'
-            logoutError.style.display = 'inline-block'
-            logoutError.style.marginTop = '30px'
-            logoutError.style.marginLeft = '2.5%'
-        }
-    })
-
-})
