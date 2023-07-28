@@ -3,6 +3,7 @@ var usernameSection = document.getElementById("user-name")
 var logoutButton = document.getElementById("logout")
 var logoutError = document.getElementById("logout-error")
 var sessionExpired = document.getElementById("session-expired")
+var sentList = document.getElementById("sent-list")
 
 
 
@@ -161,6 +162,67 @@ fetch("http://localhost:3000/userDetails", {
                 } = userDetails.details
     
                 usernameSection.innerHTML = `${name}`
+
+                sentList.innerHTML = ''
+
+                for (var request of sentFriendRequests){
+                    sentList.innerHTML += `<div class="friend">
+                            <div class="img-container">
+                               <img src="../assets/images/test.jpg" class="img" alt="">
+                            </div>
+                            <div class="details">
+                                <span class="friend-name">${ request.name }</span>
+                                <span class="friend-location">${ request.location }</span>
+                                <span class="friend-interests">${ request.interests }</span>
+                            </div>
+                            <button class="revoke-button" id=${ request._id }>revoke</button>
+                    </div>` 
+                }
+
+                var revokeButtons = document.querySelectorAll(".revoke-button")
+
+                revokeButtons.forEach((button) => {
+                    button.addEventListener("click", () => {
+    
+                        var buttonID = button.id    //string
+
+                        //send revoke-friend-id and access token in post request header
+                        var revokeFriendHeader = new Headers()
+                        revokeFriendHeader.append('x-access-token', accessToken)
+                        revokeFriendHeader.append('revoke-friend-id', buttonID)
+
+                        var revokeFriendResponse
+            
+                        fetch("http://localhost:3000/revokeFriend", {
+                            method: 'POST',
+                            headers: revokeFriendHeader
+                        })
+                        .then(response => {
+                            revokeFriendResponse = response
+                
+                            return response.json()
+                        })
+                        .then(jsonResponse => {
+                            if (revokeFriendResponse.status === 200){
+                                //show success notification
+                                button.innerHTML = 'revoked✔'
+                                button.style.color = 'green'
+                                button.disabled = true
+                                
+                            } else {
+    
+                                //show failure notification
+                                var failureTextSpan = document.createElement("span")
+                                failureTextSpan.innerHTML = "could not complete action"
+                                failureTextSpan.style.color = 'red'
+                                failureTextSpan.style.fontSize = '13px'
+                                failureTextSpan.style.display = 'inline-block'
+    
+                                button.parentNode.appendChild(failureTextSpan)
+                            }
+                        })
+                    })
+                })
             }
         })
 
@@ -170,12 +232,16 @@ fetch("http://localhost:3000/userDetails", {
 
 
 
-//fetch all registered users from api   //****only users who are NOT self, friends, sent-friend-requests, or received-friend-requests */
+//fetch all registered users for rendering on user dashboard
 var userData
 var userDataResponse
 
-fetch("http://localhost:3000/users", {
+var usersDashboardHeader = new Headers()
+usersDashboardHeader.append('x-access-token', accessToken)
+
+fetch("http://localhost:3000/usersDashboard", {
         method: 'GET',
+        headers: usersDashboardHeader
     })
     .then((response) => {
            userDataResponse = response
@@ -188,7 +254,7 @@ fetch("http://localhost:3000/users", {
             if (userDataResponse.status === 200){
                 communitySection.innerHTML = ' '
 
-                for(var profile of userData["allUsers"]){
+                for(var profile of userData.users_dashboard){
 
                     communitySection.innerHTML += `<div class="profile">
                         <div class="image-wrap">
@@ -214,7 +280,7 @@ fetch("http://localhost:3000/users", {
 
                     var buttonID = button.id    //string
             
-                    //send id and access token in post request header
+                    //send potential-friend-id and access token in post request header
                     var addFriendHeader = new Headers()
                     addFriendHeader.append('x-access-token', accessToken)
                     addFriendHeader.append('potential-friend-id', buttonID)
@@ -234,13 +300,18 @@ fetch("http://localhost:3000/users", {
                             //show success notification
                             button.innerHTML = 'Added✔'
                             button.style.color = 'green'
+                            button.disabled = true
                             
-            
-                            //reload page
-                            //window.location.reload()
                         } else {
+
                             //show failure notification
-                            console.log(jsonResponse.message)
+                            var failureTextSpan = document.createElement("span")
+                            failureTextSpan.innerHTML = "could not send request"
+                            failureTextSpan.style.color = 'red'
+                            failureTextSpan.style.fontSize = '13px'
+                            failureTextSpan.style.display = 'inline-block'
+
+                            button.parentNode.appendChild(failureTextSpan)
                         }
                     })
                 })

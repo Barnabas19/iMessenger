@@ -131,6 +131,10 @@ img {
     margin-left: 20px;
     padding: 4px 5px;
 }
+.revoke-button {
+    margin-left: 20px;
+    padding: 4px 5px;
+}
 .friend-requests {
     flex: 49% 0 0;
     margin-left: 2%;

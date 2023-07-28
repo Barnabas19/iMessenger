@@ -39,7 +39,7 @@ fetch("http://localhost:3000/users", {
             if (serverResponse.status === 200){
                 communitySection.innerHTML = ' '
 
-                for(var profile of userData["allUsers"]){
+                for(var profile of userData.allUsers){
 
                     communitySection.innerHTML += `<div class="profile">
                         <div class="image-wrap">
