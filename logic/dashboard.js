@@ -4,6 +4,13 @@ var logoutButton = document.getElementById("logout")
 var logoutError = document.getElementById("logout-error")
 var sessionExpired = document.getElementById("session-expired")
 var sentList = document.getElementById("sent-list")
+var receivedList = document.getElementById("received-list")
+var friendsList = document.getElementById("friends-list")
+var notificationsSection = document.getElementById("notifications")
+
+
+//set chat-mate in sessionStorage
+sessionStorage.setItem('chatMate', null)
 
 
 
@@ -156,14 +163,116 @@ fetch("http://localhost:3000/userDetails", {
                 const {
                     name,
                     photo,
+                    notifications,
                     friends,
                     sentFriendRequests,
                     receivedFriendRequests
                 } = userDetails.details
     
+
                 usernameSection.innerHTML = `${name}`
 
+
+                notificationsSection.innerHTML = ''
+
+                if (notifications.length === 0) {
+                    notificationsSection.innerHTML = '<p class="no-reqs">No notifications yet</p>'
+                }
+
+                for (var notification of notifications){
+                    notificationsSection.innerHTML += `<div class="notification">
+                        <span class="notification-timestamp">${ notification.timestamp }</span>
+                        <span class="notification-message">${ notification.message }</span>
+                    </div>` 
+                }
+
+
+                friendsList.innerHTML = ''
+
+                if (friends.length === 0) {
+                    friendsList.innerHTML = '<p class="no-reqs">No friends yet</p>'
+                }
+
+                for (var friend of friends){
+                    friendsList.innerHTML += `<div class="friend">
+                            <div class="img-container">
+                                <img src="../assets/images/test.jpg" class="img" alt="">
+                            </div>
+                            <span class="name">${ friend.name }</span>
+                            <button class="unfriend-button" id=${ friend._id }>unfriend</button>
+                            <a href="../markup/chat.html">
+                                <button class="chat-button" id=${ friend._id }>chat</button>
+                            </a>
+                    </div>` 
+                }
+
+                var chatButtons = document.querySelectorAll(".chat-button")
+
+                chatButtons.forEach((button) => {
+                    button.addEventListener("click", () => {    
+                        var buttonID = button.id    //string
+
+                        sessionStorage.setItem('chatMate', buttonID)
+
+                    })
+                })
+
+
+
+                var unfriendButtons = document.querySelectorAll(".unfriend-button")
+
+                unfriendButtons.forEach((button) => {
+                    button.addEventListener("click", () => {
+    
+                        var buttonID = button.id    //string
+
+                        //send unfriend-id and access token in post request header
+                        var unfriendHeader = new Headers()
+                        unfriendHeader.append('x-access-token', accessToken)
+                        unfriendHeader.append('unfriend-id', buttonID)
+
+                        var unfriendResponse
+            
+                        fetch("http://localhost:3000/unfriend", {
+                            method: 'POST',
+                            headers: unfriendHeader
+                        })
+                        .then(response => {
+                            unfriendResponse = response
+                
+                            return response.json()
+                        })
+                        .then(jsonResponse => {
+                            if (unfriendResponse.status === 200){
+                                //show success notification
+                                button.innerHTML = 'removed✔'
+                                button.style.color = 'green'
+                                button.disabled = true
+                                
+                            } else {
+    
+                                //show failure notification
+                                var failureTextSpan = document.createElement("span")
+                                failureTextSpan.innerHTML = "could not complete action"
+                                failureTextSpan.style.color = 'red'
+                                failureTextSpan.style.fontSize = '13px'
+                                failureTextSpan.style.display = 'inline-block'
+    
+                                button.parentNode.appendChild(failureTextSpan)
+                            }
+                        })
+                    })
+                })
+
+
+
+
+
                 sentList.innerHTML = ''
+
+                if (sentFriendRequests.length === 0) {
+                    sentList.innerHTML = '<p class="no-reqs">No sent friend requests</p>'
+                }
 
                 for (var request of sentFriendRequests){
                     sentList.innerHTML += `<div class="friend">
@@ -223,9 +332,128 @@ fetch("http://localhost:3000/userDetails", {
                         })
                     })
                 })
+
+
+
+                receivedList.innerHTML = ''
+
+                if (receivedFriendRequests.length === 0) {
+                    receivedList.innerHTML = '<p class="no-reqs">No friend requests received yet</p>'
+                }
+
+                for (var request of receivedFriendRequests) {
+                    receivedList.innerHTML += `<div class="friend">
+                            <div class="img-container">
+                                <img src="../assets/images/test.jpg" class="img" alt="">
+                            </div>
+                            <div class="details">
+                                <span class="friend-name">${ request.name }</span>
+                                <span class="friend-location">${ request.location }</span>
+                                <span class="friend-interests">${ request.interests }</span>
+                            </div>
+                            <button class="accept-button" id=${ request._id }>accept</button>
+                            <button class="reject-button" id=${ request._id }>reject</button>
+                    </div>`
+                }
+
+
+
+                var acceptButtons = document.querySelectorAll(".accept-button")
+
+                acceptButtons.forEach((button) => {
+                    button.addEventListener("click", () => {
+    
+                        var buttonID = button.id    //string
+
+
+                        var acceptFriendHeader = new Headers()
+                        acceptFriendHeader.append('x-access-token', accessToken)
+                        acceptFriendHeader.append('accept-friend-id', buttonID)
+
+                        var acceptFriendResponse
+                        
+                        fetch("http://localhost:3000/acceptFriend", {
+                                method: 'POST',
+                                headers: acceptFriendHeader
+                            })
+                            .then((response) => {
+                                    acceptFriendResponse = response
+                        
+                                    return response.json()
+                                })
+                                .then(jsonResponse => {
+                                    
+                                    if (acceptFriendResponse.status === 200){
+                                        //show success notification
+                                        button.innerHTML = 'accepted✔'
+                                        button.style.color = 'green'
+                                        button.disabled = true
+                                
+                                    } else {
+    
+                                        //show failure notification
+                                        var failureTextSpan = document.createElement("span")
+                                        failureTextSpan.innerHTML = "could not complete action"
+                                        failureTextSpan.style.color = 'red'
+                                        failureTextSpan.style.fontSize = '13px'
+                                        failureTextSpan.style.display = 'inline-block'
+    
+                                        button.parentNode.appendChild(failureTextSpan)
+                                    }
+                               })
+                            })
+                        })
+
+
+                        
+                var rejectButtons = document.querySelectorAll(".reject-button")
+
+                rejectButtons.forEach((button) => {
+                    button.addEventListener("click", () => {
+                
+                        var buttonID = button.id    //string
+
+
+                        var rejectFriendHeader = new Headers()
+                        rejectFriendHeader.append('x-access-token', accessToken)
+                        rejectFriendHeader.append('reject-friend-id', buttonID)
+
+                        var rejectFriendResponse
+                        
+                        fetch("http://localhost:3000/rejectFriend", {
+                                method: 'POST',
+                                headers: rejectFriendHeader
+                            })
+                            .then((response) => {
+                                    rejectFriendResponse = response
+                        
+                                    return response.json()
+                                })
+                                .then(jsonResponse => {
+                                    
+                                    if (rejectFriendResponse.status === 200){
+                                        //show success notification
+                                        button.innerHTML = 'rejected'
+                                        button.style.color = 'red'
+                                        button.disabled = true
+                                
+                                    } else {
+    
+                                        //show failure notification
+                                        var failureTextSpan = document.createElement("span")
+                                        failureTextSpan.innerHTML = "could not complete action"
+                                        failureTextSpan.style.color = 'red'
+                                        failureTextSpan.style.fontSize = '13px'
+                                        failureTextSpan.style.display = 'inline-block'
+    
+                                        button.parentNode.appendChild(failureTextSpan)
+                                    }
+                               })
+                            })
+                        
+                })
             }
         })
-
 
 
 
@@ -248,7 +476,7 @@ fetch("http://localhost:3000/usersDashboard", {
 
            return response.json()
         })
-        .then(jsonResponse => {
+        .then((jsonResponse) => {
             userData = jsonResponse
 
             if (userDataResponse.status === 200){
@@ -313,7 +541,8 @@ fetch("http://localhost:3000/usersDashboard", {
 
                             button.parentNode.appendChild(failureTextSpan)
                         }
-                    })
-                })
-            })
+                    }) //acct
+                
+            }) //acct
+        }) //acct
         })

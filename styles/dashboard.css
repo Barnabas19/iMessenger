@@ -72,6 +72,35 @@ body {
     flex: 80% 0 0;
 }
 
+.notifications-section {
+    width: 46.5%;
+    margin-left: 2.5%;
+    margin-top: 50px;
+}
+
+.notifications-list {
+    height: 150px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    padding-top: 1px;
+}
+
+.notification{
+    margin-top: 30px;
+}
+
+.notification-timestamp,
+.notification-message{
+    font-size: 13px;
+}
+.notification-timestamp{
+    color: green;
+}
+
+.notification-message {
+    margin-left: 15px;
+}
+
 .friends-section{
     width: 95%;
     margin-left: 2.5%;
@@ -127,13 +156,20 @@ img {
     font-size: 11px;
 }
 
-.button {
+.button,
+.accept-button,
+.reject-button,
+.revoke-button,
+.unfriend-button,
+.chat-button
+ {
     margin-left: 20px;
     padding: 4px 5px;
 }
-.revoke-button {
-    margin-left: 20px;
-    padding: 4px 5px;
+
+.no-reqs{
+    font-size: 13px;
+    margin-top: 30px;
 }
 .friend-requests {
     flex: 49% 0 0;
