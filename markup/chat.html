@@ -8,10 +8,49 @@
 </head>
 <body>
 
-    <div>
-        chat page
+    <div class="wrap">
+        <a href="./dashboard.html"><button class="back-button">Back</button></a>
+
+        <section class="friend-profile">
+            <div class="friend-img-wrap">
+                <img class="friend-img" src="../assets/images/test.jpg" alt="">
+            </div>
+            <span class="friend-name" id="friend-name">Barnabas Babatunde</span>
+        </section>
+
+
+        <h3 class="messages-heading">Chats</h3>
+        <section class="messages">
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+            <div class="message">lorem ipsum dolor</div>
+        </section>
+
+
+        <form class="form">
+            <textarea name="text" id="" cols="30" rows="10" class="text-message" placeholder="send a message"></textarea>
+            <button class="send-button">send</button>
+        </form>
     </div>
 
+    <script type="module">
+        import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+    </script>
     <script src="../logic/chat.js"></script>
 </body>
 </html>

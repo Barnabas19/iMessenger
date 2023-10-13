@@ -201,7 +201,7 @@ fetch("http://localhost:3000/userDetails", {
                             <span class="name">${ friend.name }</span>
                             <button class="unfriend-button" id=${ friend._id }>unfriend</button>
                             <a href="../markup/chat.html">
-                                <button class="chat-button" id=${ friend._id }>chat</button>
+                                <button class="chat-button" id=${ friend._id + "." + friend.name.replace(" ", ".") }>chat</button>
                             </a>
                     </div>` 
                 }
